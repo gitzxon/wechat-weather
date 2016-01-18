@@ -249,7 +249,7 @@ class Wechat
 	private function checkSignature($str='')
 	{
         $signature = isset($_GET["signature"])?$_GET["signature"]:'';
-	    $signature = isset($_GET["msg_signature"])?$_GET["msg_signature"]:$signature; //如果存在加密验证则用加密验证段
+	    $msg_signature = isset($_GET["msg_signature"])?$_GET["msg_signature"]:$signature; //如果存在加密验证则用加密验证段
         $timestamp = isset($_GET["timestamp"])?$_GET["timestamp"]:'';
         $nonce = isset($_GET["nonce"])?$_GET["nonce"]:'';
 
@@ -258,8 +258,13 @@ class Wechat
 		sort($tmpArr, SORT_STRING);
 		$tmpStr = implode( $tmpArr );
 		$tmpStr = sha1( $tmpStr );
-
-		if( $tmpStr == $signature ){
+		if( $tmpStr == $signature || $tmpStr == $msg_signature){
+            /**
+             * 原文实际上是判断了$tmpStr == $msg_signature
+             * 但是在“兼容模式”下，算出的结果为
+             * $tmpStr == $signature is true
+             * $tmpStr == $msg_signature is false
+             */
 			return true;
 		}else{
 			return false;
