@@ -8,4 +8,5 @@ return [
     'adminEmail' => 'admin@example.com',
     'wechat' => $wechat,
     'smartWeather' => $smartWeather,
+    'amapMap' => $amapMap,
 ];

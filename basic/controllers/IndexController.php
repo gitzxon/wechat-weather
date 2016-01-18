@@ -10,6 +10,7 @@ namespace app\controllers;
 
 require(__DIR__ . '/../utils/wechat.class.php');
 
+use app\models\map\AmapMap;
 use Yii;
 use yii\web\Controller;
 use Wechat;
@@ -58,8 +59,16 @@ class IndexController extends Controller
                 $x = $postArray['Location_X'];
                 $y = $postArray['Location_Y'];
                 $label = $postArray['Label'];
-//                $this->wechatObj->text($x . ' | ' . $y . ' | ' . $label)->reply();
+//                $this->wechatObj->text('hello')->reply();
 
+                $amapObj = new AmapMap();
+                $responseJson = $amapObj->reGeo($x, $y);
+                if ($responseJson['status'] == "0") {
+                    $this->wechatObj->text("对不起主人，小天实在不能理解您的地理位置")->reply();
+                } else {
+                    $amapObj->initLocationData($responseJson);
+                    $this->wechatObj->text($amapObj->province . '|' . $amapObj->city . '|' . $amapObj->district)->reply();
+                }
                 exit;
                 break;
             case Wechat::MSGTYPE_EVENT:

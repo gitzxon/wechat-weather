@@ -6,7 +6,7 @@
  * Time: 下午1:22
  */
 
-namespace app\models;
+namespace app\models\map;
 
 use yii\base\Model;
 
@@ -15,5 +15,5 @@ class BaseMap extends Model
     public $x;
     public $y;
     public $location;
-
+    public $baseUrl;
 }
