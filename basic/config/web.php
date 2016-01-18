@@ -1,7 +1,6 @@
 <?php
 
 $params = require(__DIR__ . '/params.php');
-$wechat_params = require(__DIR__ . 'WechatConfig.php');
 
 $config = [
     'id' => 'basic',
@@ -32,9 +31,15 @@ $config = [
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
-                [
+//                [
+//                    'class' => 'yii\log\FileTarget',
+//                    'levels' => ['error', 'warning'],
+//                ],
+                'file' => [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
+                    'levels' => ['trace', 'info'],
+//                    'categories' => ['*'],
+//                    'categories' => ['yii\*'],
                 ],
             ],
         ],
@@ -54,8 +59,13 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
-        'allowedIPs' => ['*.*.*.*'],
+        //'allowedIPs' => ['*.*.*.*'],
     ];
 }
+
+//$config['bootstrap'][]='wechatUtil';
+//$config['modules']['wechatUtil'] = [
+//    'class' => '',
+//];
 
 return $config;
