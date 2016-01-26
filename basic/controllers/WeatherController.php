@@ -19,7 +19,6 @@ class WeatherController extends Controller
     {
         /* @var SmartWeather smartWeather */
         $smartWeather = new SmartWeather();
-        echo $smartWeather->getWeatherData("101010100", SmartWeather::TYPE_FORECAST_F);
-
+        echo $smartWeather->getWeatherData("101010100", SmartWeather::TYPE_FORECAST_V);
     }
 }

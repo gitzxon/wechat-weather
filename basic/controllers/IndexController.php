@@ -11,6 +11,8 @@ namespace app\controllers;
 require(__DIR__ . '/../utils/wechat.class.php');
 
 use app\models\map\AmapMap;
+use app\models\weather\SmartWeather;
+use app\models\weather\SmartWeatherLocation;
 use Yii;
 use yii\web\Controller;
 use Wechat;
@@ -63,11 +65,43 @@ class IndexController extends Controller
 
                 $amapObj = new AmapMap();
                 $responseJson = $amapObj->reGeo($x, $y);
+                Yii::info($responseJson);
                 if ($responseJson['status'] == "0") {
                     $this->wechatObj->text("对不起主人，小天实在不能理解您的地理位置")->reply();
                 } else {
                     $amapObj->initLocationData($responseJson);
-                    $this->wechatObj->text($amapObj->province . '|' . $amapObj->city . '|' . $amapObj->district)->reply();
+                    $smartWeatherLocationObj = new SmartWeatherLocation();
+                    $locationJson = $smartWeatherLocationObj->getAreaIdFromAreaName($amapObj->province, $amapObj->city, $amapObj->district);
+                    Yii::info($locationJson, "debug_ang");
+                    if ($locationJson == null) {
+                        $this->wechatObj->text("help info")->reply();
+                        exit;
+                    } else {
+                        $locationId = $locationJson['area_id'];
+                        $smartWeatherObj = new SmartWeather();
+                        $weatherDataJson = $smartWeatherObj->getWeatherData($locationId, SmartWeather::TYPE_FORECAST_V);
+                        $suggestionDataJson = $smartWeatherObj->getWeatherData($locationId, SmartWeather::TYPE_INDEX_V);
+                        $threeDayWeatherArray = $smartWeatherObj->parseForecastData($weatherDataJson);
+                        $todaySuggestionArray = $smartWeatherObj->parseIndexData($suggestionDataJson);
+
+                        Yii::info($weatherDataJson);
+                        Yii::info($suggestionDataJson);
+
+                        $replyStr = "";
+                        $locationStr = $amapObj->province . '|' . $amapObj->city . '|' . $amapObj->district . "\r\n";
+                        $replyStr .= $locationStr;
+                        $todayWeather = $threeDayWeatherArray[0];
+                        $todayWeather['eveningTemperature'];
+                        $replyStr .= "白天: " . $todayWeather['morningWeather'] . ", 温度: " . $todayWeather['morningTemperature']
+                            . ", 晚上: " . $todayWeather['eveningWeather'] . ", 温度: " . $todayWeather['eveningTemperature'] . "\r\n";
+
+                        foreach ($todaySuggestionArray as $oneSuggestion) {
+                            $tempStr = $oneSuggestion["type"] . ": " . $oneSuggestion["level"] . " | " . $oneSuggestion["description"] . "\r\n";
+                            $replyStr .= $tempStr;
+                        }
+                        $replyStr .= "小天祝您身体健康,生活快乐!";
+                        $this->wechatObj->text($replyStr)->reply();
+                    }
                 }
                 exit;
                 break;

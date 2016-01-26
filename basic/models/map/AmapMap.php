@@ -8,9 +8,11 @@
 namespace app\models\map;
 
 use app\models\map\BaseMap;
+use app\models\decorator\LocationDecorationTrait;
 
 class AmapMap extends BaseMap
 {
+    use LocationDecorationTrait;
 
     public $baseUrl = 'http://restapi.amap.com/v3/geocode/regeo?';
     public $province;
@@ -49,5 +51,12 @@ class AmapMap extends BaseMap
             $this->city = $addressNames['city'];
         }
         $this->district = $addressNames['district'];
+
+        /**
+         * 从高德取的数据包含“省”“市”“区”等字符，导致数据库检索失败。去掉即可。
+         */
+        $this->province = $this->removeLastCharacter($this->province);
+        $this->city = $this->removeLastCharacter($this->city);
+        $this->district = $this->removeLastCharacter($this->district);
     }
 }
